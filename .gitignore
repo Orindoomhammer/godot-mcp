@@ -1,0 +1,32 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+# Python MCP server
+/server/.venv/
+/server/__pycache__/
+/server/*.egg-info/
+/server/uv.lock
+
+# Downloaded assets (Claw&Blade Medieval pack) — not ours, kept out of the repo
+/Buildings/
+/Characters/
+/GUI/
+/Icons/
+/Tilemaps/
+/Documentation/
+
+# Third-party editor addon (installed separately, not ours)
+/addons/curved_lines_2d/
+
+# Godot project scaffolding and demo content — this repo is just the MCP
+# server + plugin, meant to drop into any Godot project.
+/project.godot
+/icon.svg
+/icon.svg.import
+/.editorconfig
+/.gitattributes
+/scenes/
+
+# Claude Code local config
+/.claude/

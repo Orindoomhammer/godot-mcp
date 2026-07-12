@@ -1,0 +1,18 @@
+[project]
+name = "godot-mcp-server"
+version = "0.1.0"
+description = "MCP server that drives the running Godot editor via the godot_mcp plugin's TCP command server."
+requires-python = ">=3.10"
+dependencies = [
+    "mcp[cli]>=1.2.0",
+]
+
+[project.scripts]
+godot-mcp-server = "godot_mcp_server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+py-modules = ["godot_mcp_server"]
