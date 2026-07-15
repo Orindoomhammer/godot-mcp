@@ -34,6 +34,9 @@ This repository ships the addon and the bridge, not a Godot project — copy
 | `run_project` | Play the currently edited scene (falls back to the main scene) |
 | `play_scene` | Play a specific scene by path |
 | `stop_project` | Stop the running scene |
+| `list_input_actions` | List InputMap actions and their bound events |
+| `add_input_action` | Add or replace an InputMap action, with key/mouse events |
+| `remove_input_action` | Remove an InputMap action |
 
 ## Setup
 

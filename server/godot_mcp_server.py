@@ -201,6 +201,42 @@ def stop_project() -> str:
     return _fmt(send_command("stop_project"))
 
 
+@mcp.tool()
+def list_input_actions() -> str:
+    """List the project's Input Map actions and their bound events."""
+    return _fmt(send_command("list_input_actions"))
+
+
+@mcp.tool()
+def add_input_action(action: str, events: list[dict], deadzone: float = 0.5) -> str:
+    """Create or replace an Input Map action in Project Settings and save it.
+
+    Each event is a dict:
+      - key:          {"type": "key", "keycode": "H"}   (single letter, or a
+                       name like "escape"/"space", or an int keycode)
+      - mouse button: {"type": "mouse_button", "button": "left"}
+                       (left/right/middle/wheel_up/wheel_down)
+
+    Args:
+        action: Action name, e.g. "possess" or "stop_pawn".
+        events: List of event specs (see above) to bind to the action.
+        deadzone: Analog deadzone, defaults to 0.5.
+    """
+    return _fmt(send_command("add_input_action", {
+        "action": action, "events": events, "deadzone": deadzone,
+    }))
+
+
+@mcp.tool()
+def remove_input_action(action: str) -> str:
+    """Remove an Input Map action from Project Settings and save.
+
+    Args:
+        action: The action name to remove.
+    """
+    return _fmt(send_command("remove_input_action", {"action": action}))
+
+
 # ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------

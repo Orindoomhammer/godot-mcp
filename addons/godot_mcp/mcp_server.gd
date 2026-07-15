@@ -154,6 +154,12 @@ func _dispatch(command: String, params: Dictionary):
 			return _cmd_play_scene(params)
 		"stop_project":
 			return _cmd_stop_project(params)
+		"list_input_actions":
+			return _cmd_list_input_actions(params)
+		"add_input_action":
+			return _cmd_add_input_action(params)
+		"remove_input_action":
+			return _cmd_remove_input_action(params)
 		_:
 			return _err("Unknown command: '%s'" % command)
 
@@ -353,6 +359,121 @@ func _cmd_play_scene(params: Dictionary):
 func _cmd_stop_project(_params: Dictionary):
 	EditorInterface.stop_playing_scene()
 	return {"stopped": true}
+
+
+# ---------------------------------------------------------------------------
+# Input Map editing
+# ---------------------------------------------------------------------------
+
+func _cmd_list_input_actions(_params: Dictionary):
+	var actions: Dictionary = {}
+	for prop in ProjectSettings.get_property_list():
+		var pname: String = prop.name
+		if pname.begins_with("input/"):
+			var action := pname.substr("input/".length())
+			var setting = ProjectSettings.get_setting(pname)
+			var events: Array = []
+			if setting is Dictionary and setting.has("events"):
+				for e in setting["events"]:
+					events.append(_describe_event(e))
+			actions[action] = events
+	return {"actions": actions}
+
+
+func _cmd_add_input_action(params: Dictionary):
+	var action: String = params.get("action", "")
+	if action.is_empty():
+		return _err("An 'action' name is required.")
+
+	var events: Array = []
+	for spec in params.get("events", []):
+		var ev := _build_event(spec)
+		if ev == null:
+			return _err("Could not build input event from: %s" % str(spec))
+		events.append(ev)
+
+	var setting := {
+		"deadzone": float(params.get("deadzone", 0.5)),
+		"events": events,
+	}
+	ProjectSettings.set_setting("input/" + action, setting)
+	var err := ProjectSettings.save()
+	if err != OK:
+		return _err("ProjectSettings.save() failed with error %d." % err)
+	return {"added": action, "event_count": events.size()}
+
+
+func _cmd_remove_input_action(params: Dictionary):
+	var action: String = params.get("action", "")
+	var key := "input/" + action
+	if not ProjectSettings.has_setting(key):
+		return _err("No input action named '%s'." % action)
+	ProjectSettings.clear(key)
+	var err := ProjectSettings.save()
+	if err != OK:
+		return _err("ProjectSettings.save() failed with error %d." % err)
+	return {"removed": action}
+
+
+func _describe_event(e) -> String:
+	if e is InputEventKey:
+		var k := e as InputEventKey
+		var code: int = k.physical_keycode if k.physical_keycode != 0 else k.keycode
+		return "key:%d" % code
+	elif e is InputEventMouseButton:
+		var m := e as InputEventMouseButton
+		return "mouse_button:%d" % m.button_index
+	elif e is InputEventJoypadButton:
+		var j := e as InputEventJoypadButton
+		return "joy_button:%d" % j.button_index
+	return e.get_class()
+
+
+## Build an InputEvent from a spec dict:
+##   {"type": "key", "keycode": "H"}  or  {"type": "mouse_button", "button": "left"}
+func _build_event(spec: Dictionary) -> InputEvent:
+	match String(spec.get("type", "")):
+		"key":
+			var ev := InputEventKey.new()
+			ev.keycode = _keycode_from(spec.get("keycode", 0))
+			return ev
+		"mouse_button":
+			var ev := InputEventMouseButton.new()
+			ev.button_index = _mouse_button_index(spec.get("button", "left"))
+			return ev
+	return null
+
+
+## Named keys we support by name; single characters map by their code point
+## (KEY_A == 'A' == 65). Anything else should be passed as an int keycode.
+const _NAMED_KEYS := {
+	"escape": KEY_ESCAPE, "space": KEY_SPACE, "enter": KEY_ENTER,
+	"tab": KEY_TAB, "shift": KEY_SHIFT, "ctrl": KEY_CTRL, "alt": KEY_ALT,
+	"up": KEY_UP, "down": KEY_DOWN, "left": KEY_LEFT, "right": KEY_RIGHT,
+}
+
+
+func _keycode_from(v) -> int:
+	if v is int or v is float:
+		return int(v)
+	var s := String(v)
+	if s.length() == 1:
+		return s.to_upper().unicode_at(0)  # KEY_A == 'A' (65), etc.
+	return _NAMED_KEYS.get(s.to_lower(), 0)
+
+
+func _mouse_button_index(name) -> int:
+	match String(name).to_lower():
+		"right":
+			return MOUSE_BUTTON_RIGHT
+		"middle":
+			return MOUSE_BUTTON_MIDDLE
+		"wheel_up":
+			return MOUSE_BUTTON_WHEEL_UP
+		"wheel_down":
+			return MOUSE_BUTTON_WHEEL_DOWN
+		_:
+			return MOUSE_BUTTON_LEFT
 
 
 # ---------------------------------------------------------------------------
