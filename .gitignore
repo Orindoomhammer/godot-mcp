@@ -27,6 +27,7 @@
 /.editorconfig
 /.gitattributes
 /scenes/
+/sim/
 
 # Claude Code local config
 /.claude/

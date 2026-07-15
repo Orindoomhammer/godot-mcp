@@ -14,8 +14,8 @@ Claude  ──stdio──►  godot_mcp_server.py  ──TCP 127.0.0.1:9080─�
 - `server/godot_mcp_server.py` is an MCP **stdio** server. Each tool call is
   relayed to the editor over a short-lived TCP socket.
 
-The plugin is already enabled in `project.godot`, so it starts automatically the
-next time you open this project in Godot 4.7+.
+This repository ships the addon and the bridge, not a Godot project — copy
+`addons/godot_mcp/` into a project of your own and enable it there.
 
 ## Tools
 
@@ -24,17 +24,21 @@ next time you open this project in Godot 4.7+.
 | `ping` | Confirm the editor is reachable; report Godot version |
 | `get_editor_state` | Whether a scene is open, its path, play state |
 | `get_scene_tree` | Full node hierarchy of the edited scene |
+| `list_project_files` | Resource paths under `res://`, filterable by extension |
+| `open_scene` | Open a `.tscn` into an editor tab |
 | `get_node_properties` | Editor-visible properties of one node |
 | `create_node` | Instantiate a node and add it to the scene |
 | `delete_node` | Remove a node (and children) |
 | `set_node_property` | Set a property (supports Godot literals like `Vector2(1,2)`) |
 | `save_scene` | Save the edited scene to its `.tscn` |
-| `run_project` | Play the main scene |
+| `run_project` | Play the currently edited scene (falls back to the main scene) |
+| `play_scene` | Play a specific scene by path |
 | `stop_project` | Stop the running scene |
 
 ## Setup
 
-1. **Open the project in Godot** (4.7+). The console should print:
+1. **Copy `addons/godot_mcp/` into your Godot project** and enable it in
+   *Project → Project Settings → Plugins*. The console should print:
    `[Godot MCP] Command server listening on 127.0.0.1:9080`
    Open a scene so the node tools have something to act on.
 
@@ -57,7 +61,7 @@ next time you open this project in Godot 4.7+.
 ### Claude Code
 
 ```sh
-claude mcp add godot -- uv --directory "E:/Users/waco_/Documents/mcp-plugin-test/server" run python godot_mcp_server.py
+claude mcp add godot -- uv --directory /path/to/godot-mcp/server run python godot_mcp_server.py
 ```
 
 ### Raw MCP config (claude_desktop_config.json, etc.)
@@ -69,7 +73,7 @@ claude mcp add godot -- uv --directory "E:/Users/waco_/Documents/mcp-plugin-test
       "command": "uv",
       "args": [
         "--directory",
-        "E:/Users/waco_/Documents/mcp-plugin-test/server",
+        "/path/to/godot-mcp/server",
         "run",
         "python",
         "godot_mcp_server.py"

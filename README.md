@@ -31,7 +31,7 @@ Two halves:
 | `delete_node` | Remove a node (and its children) |
 | `set_node_property` | Set a property (supports Godot literals like `Vector2(1,2)`) |
 | `save_scene` | Save the edited scene to its `.tscn` |
-| `run_project` | Play the currently edited scene |
+| `run_project` | Play the currently edited scene (falls back to the main scene) |
 | `play_scene` | Play a specific scene by path |
 | `stop_project` | Stop the running scene |
 
